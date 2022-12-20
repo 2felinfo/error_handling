@@ -1,20 +1,20 @@
 
 from amqpmanager import MQConnector
-
+import pika
 from  amqpmanager import MQSender
 class SendException:
-    def __init__(self,host="10.13.2.137",port="5672",virtualhost="CaptosDev",username="CaptosDev",password="CaptosDev",queue="TESTQUEUE"):
+    def __init__(self,host="127.0.0.1",port="15672",virtualhost="guest",username="guest",password="guest",queue="TEST"):
         self.host=host
         self.port=port
         self.virtualhost=virtualhost
         self.username=username
         self.password=password
-        self.connection=MQConnector.connect_with_credentials(self.host,self.port,self.virtualhost,self.username,self.password)
+        connector=MQConnector()
+        self.connection =pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         self.channel=self.connection.channel()
         self.sender=MQSender()
         self.exchange=""
         self.routing_key=queue
-
-    def send_exception(self):
-
-        self.sender.send(self.connection,self.channel,self.exchange,self.routing_key,"hello")
+    def send_exception(self, exception):
+        messageString=exception['message']
+        self.sender.send(self.connection,self.channel,self.exchange,self.routing_key,messageString)
